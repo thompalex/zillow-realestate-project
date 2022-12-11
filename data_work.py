@@ -30,7 +30,6 @@ def add_geocoding(data):
 # Generate the project nd from the zillow files and the region mapping
 def generate_dataset():
     region_mapping = pd.read_csv('states.csv')
-
     # Concatenate each of the csvs that correspond to individual bedroom amounts
     arr = []
     for i in range(1, 6):
@@ -40,12 +39,30 @@ def generate_dataset():
         arr.append(nd)
     zillow_data = pd.concat(arr, axis=0)
     # Merge with region mapping to get region name
-    merged = pd.merge(zillow_data, region_mapping, left_on="State", right_on="State")
+    data_with_region = pd.merge(zillow_data, region_mapping, left_on="State", right_on="State")
     # Drop unnecessary columns
-    merged = merged[['RegionID', 'RegionName', 'State', 'City', 'Metro', '2022-10-31', 'bedrooms', 'Region', 'State Name']]
+    data_with_region = data_with_region[['RegionID', 'RegionName', 'State', 'City', 'Metro', '2022-10-31', 'bedrooms', 'Region', 'State Name']]
     # Reset the indicies and save the DF to a csv
-    merged.reset_index()
-    merged.to_csv('project_dataset.csv', index=False)
+    data_with_region.reset_index()
+    # Open Neighborhood to latlon and zipcode mapping file
+    zip_latlon_mapping = pd.read_csv('unique_neighborhoods_w_zip_latlon.csv')
+    # Merge zipcodes and latlons with zillow data
+    data_w_zip_latlon = pd.merge(zip_latlon_mapping, data_with_region, left_on=['Neighborhood', 'State', 'City'], right_on=['RegionName', 'State Name', 'City'])
+    # Format data nicely
+    data_w_zip_latlon['State'] = data_w_zip_latlon['State_y']
+    data_w_zip_latlon['Price'] = data_w_zip_latlon['2022-10-31']
+    data_w_zip_latlon = data_w_zip_latlon[['Neighborhood','latlon','zipcode','RegionID','State','City','Metro','Price','bedrooms','Region','State Name']]
+    # Load in price forecasts
+    price_forecasts = pd.read_csv('zillow_data/pricing_forecast.csv')    
+    price_forecasts = price_forecasts[['RegionName', '2023-10-31']]
+    # Merge price forecasts into project dataset
+    complete_df = pd.merge(data_w_zip_latlon, price_forecasts, left_on='zipcode', right_on='RegionName', how='left')
+    print(data_w_zip_latlon)
+    # Reformat dataset
+    complete_df['zipcode'] = complete_df['RegionName']
+    complete_df['forecast'] = complete_df['2023-10-31']
+    complete_df = complete_df[['Neighborhood','latlon','zipcode','RegionID','State','City','Metro','Price','bedrooms','Region','State Name', 'forecast']]
+    complete_df.to_csv('project_dataset.csv', index=False)
 
 
 # Make a query from the frontend
@@ -59,16 +76,16 @@ def make_query(args):
     with_region = data[data['Region'] == args['region']]
     with_bedrooms = with_region[with_region['bedrooms'] == int(args['beds'])]
     bottom_price, top_price = [int(x.strip(' $').replace(',', '')) for x in args['price'].split('-')]
-    with_all = with_bedrooms.loc[(with_bedrooms['2022-10-31'] >= bottom_price) & (with_bedrooms['2022-10-31']  <= top_price)]
+    with_all = with_bedrooms.loc[(with_bedrooms['Price'] >= bottom_price) & (with_bedrooms['Price']  <= top_price)]
     # Get mortgage rate and timeline to calculate monthly payment using numpy_financial
     rate = sum([int(x.strip().replace('%','')[0]) for x in args['rate'].split('-')]) / 2
     timeline = int(args['timeline'].split()[0])
-    with_all['monthly_payment'] = with_all['2022-10-31'].apply(lambda x: f'${round(-1 * npf.pmt(rate / 100 / 12, 12 * timeline,x), 2):,.2f}')
+    with_all['monthly_payment'] = with_all['Price'].apply(lambda x: f'${round(-1 * npf.pmt(rate / 100 / 12, 12 * timeline,x), 2):,.2f}')
     # Get the top 5 most expensive and top 5 least expensive results to display on the frontend
-    most_and_least_expensive = pd.concat([with_all.sort_values(by=['2022-10-31'], ascending = False).head(), with_all.sort_values(by=['2022-10-31']).head()], join='inner', ignore_index=True)
+    most_and_least_expensive = pd.concat([with_all.sort_values(by=['Price'], ascending = False).head(), with_all.sort_values(by=['Price']).head()], join='inner', ignore_index=True)
     # Run the geocoding function to get coordinates and return
-    most_and_least_expensive['2022-10-31'] = most_and_least_expensive['2022-10-31'].apply(lambda x: f'${x:,.2f}')
-    return add_geocoding(most_and_least_expensive)
+    most_and_least_expensive['Price'] = most_and_least_expensive['Price'].apply(lambda x: f'${x:,.2f}')
+    return most_and_least_expensive
 
 ### Test statements for these methods ###
 if __name__ == '__main__':
