@@ -111,7 +111,7 @@ def make_query(args):
     if not os.path.exists('project_dataset.csv'):
         generate_dataset()
     # Read in the compiled data
-    data = pd.read_csv('project_dataset.csv')
+    data = pd.read_csv('project_dataset.csv').fillna('')
     # Each of the four following lines filters out results that do not adhere to the inputs
     with_region = data[data['Region'] == args['region']]
     with_bedrooms = with_region[with_region['bedrooms'] == int(args['beds'])]

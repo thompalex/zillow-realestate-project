@@ -17,8 +17,9 @@ def homepage():
 @app.route("/api", methods=["POST"])
 def get_suggestion():
     args = request.get_json()
-    res = make_query(args)
-    return json.dumps(res.to_dict('records'))
+    res = make_query(args).to_dict('records')
+    print(json.dumps(res))
+    return json.dumps(res)
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0')
