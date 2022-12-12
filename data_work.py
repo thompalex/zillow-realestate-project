@@ -5,8 +5,7 @@ import json
 import os
 
 # This is where the actual data stuff is done for the most part
-def get_unique_neighborhoods():
-    dataset = pd.read_csv("data/project_dataset.csv")
+def get_unique_neighborhoods(dataset):
     unique_neighborhoods = set()
     df_with_unique = pd.DataFrame(columns=['Neighborhood', 'City', 'State'])
     length = len(df_with_unique)
@@ -67,6 +66,11 @@ def add_zipcodes():
     unique_neighborhoods_w_latlon['zipcode'] = unique_neighborhoods_w_latlon.apply(lambda x: get_zipcode(x['latlon']), axis=1)
     unique_neighborhoods_w_latlon.to_csv('data/other/unique_neighborhoods_w_zip_latlon.csv')
 
+def create_zipcode_mapping():
+    get_unique_neighborhoods()
+    add_latlon()
+    add_zipcodes()
+
 
 # Generate the project nd from the zillow files and the region mapping
 def generate_dataset():
@@ -85,6 +89,9 @@ def generate_dataset():
     data_with_region = data_with_region[['RegionID', 'RegionName', 'State', 'City', 'Metro', '2022-10-31', 'bedrooms', 'Region', 'State Name']]
     # Reset the indicies and save the DF to a csv
     data_with_region.reset_index()
+    # I highly recommend not ever deleting the mapping file since it would take around 6 hours to recreate, but this is here for completeness
+    if not os.path.exists('data/other/unique_neighborhoods_w_zip_latlon.csv'):
+        create_zipcode_mapping()
     # Open Neighborhood to latlon and zipcode mapping file
     zip_latlon_mapping = pd.read_csv('data/other/unique_neighborhoods_w_zip_latlon.csv')
     # Merge zipcodes and latlons with zillow data
