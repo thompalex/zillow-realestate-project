@@ -111,7 +111,7 @@ def make_query(args):
     if not os.path.exists('project_dataset.csv'):
         generate_dataset()
     # Read in the compiled data
-    data = pd.read_csv('project_dataset.csv').fillna('')
+    data = pd.read_csv('project_dataset.csv').fillna(0)
     # Each of the four following lines filters out results that do not adhere to the inputs
     with_region = data[data['Region'] == args['region']]
     with_bedrooms = with_region[with_region['bedrooms'] == int(args['beds'])]
@@ -121,11 +121,21 @@ def make_query(args):
     rate = sum([int(x.strip().replace('%','')[0]) for x in args['rate'].split('-')]) / 2
     timeline = int(args['timeline'].split()[0])
     with_all['monthly_payment'] = with_all['Price'].apply(lambda x: f'${round(-1 * npf.pmt(rate / 100 / 12, 12 * timeline,x), 2):,.2f}')
-    # Get the top 5 most expensive and top 5 least expensive results to display on the frontend
-    most_and_least_expensive = pd.concat([with_all.sort_values(by=['Price'], ascending = False).head(), with_all.sort_values(by=['Price']).head()], join='inner', ignore_index=True)
-    # Run the geocoding function to get coordinates and return
-    most_and_least_expensive['Price'] = most_and_least_expensive['Price'].apply(lambda x: f'${x:,.2f}')
-    return most_and_least_expensive
+    print(args['forecast'])
+    if not args['forecast']:
+        # Get the top 5 most expensive and top 5 least expensive results to display on the frontend
+        most_and_least_expensive = pd.concat([with_all.sort_values(by=['Price'], ascending = False).head(), with_all.sort_values(by=['Price']).head()], join='inner', ignore_index=True)
+        # Run the geocoding function to get coordinates and return
+        most_and_least_expensive['Price'] = most_and_least_expensive['Price'].apply(lambda x: f'${x:,.2f}')
+        return most_and_least_expensive
+    # Calculate forecasted price changes
+    with_all['price_change'] = with_all.apply(lambda x: x['Price'] * x['forecast'] / 100, axis=1)
+    ## Get highest and lowest expected price change
+    highest_and_lowest_change = pd.concat([with_all.sort_values(by=['price_change'], ascending = False).head(), with_all.sort_values(by=['price_change']).head()], join='inner', ignore_index=True)
+    # Format prices for frontend
+    highest_and_lowest_change['price_change'] = highest_and_lowest_change['price_change'].apply(lambda x: f'${x:,.2f}')
+    highest_and_lowest_change['Price'] = highest_and_lowest_change['Price'].apply(lambda x: f'${x:,.2f}')
+    return highest_and_lowest_change
 
 ### Test statements for these methods ###
 if __name__ == '__main__':

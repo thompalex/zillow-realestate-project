@@ -18,7 +18,6 @@ def homepage():
 def get_suggestion():
     args = request.get_json()
     res = make_query(args).to_dict('records')
-    print(json.dumps(res))
     return json.dumps(res)
 
 if __name__ == "__main__":

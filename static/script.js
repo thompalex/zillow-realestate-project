@@ -38,6 +38,7 @@ document.getElementById('getResults').addEventListener('click', async (e) => {
     for (i = 0; i < dropdowns.length; i++) {
         d[dropdowns[i].children[0].name] = dropdowns[i].children[0].textContent;
     }
+    d['forecast'] = document.getElementById("forecast_prices").checked;
     // If we have already run a query, our animations need to be adjusted
     if (count > 0) {
         document.getElementById('title1').classList.remove('tableFadeIn');
@@ -45,6 +46,17 @@ document.getElementById('getResults').addEventListener('click', async (e) => {
         document.getElementById('table').classList.remove('tableFadeIn');
         document.getElementById('table2').classList.remove('tableFadeIn');
         document.getElementById('loader').style.height = "120px";
+    }
+    if (d['forecast']){
+        document.getElementById('title1').innerHTML = "Highest Price Changes";
+        document.getElementById('title2').innerHTML = "Lowest Price Changes";
+        document.getElementById('forecast_col1').innerHTML = "Estimated YoY Price Change";
+        document.getElementById('forecast_col2').innerHTML = "Estimated YoY Price Change";
+    } else {
+        document.getElementById('title1').innerHTML = "Most Expensive";
+        document.getElementById('title2').innerHTML = "Least Expensive";
+        document.getElementById('forecast_col1').innerHTML = "";
+        document.getElementById('forecast_col2').innerHTML = "";
     }
     count += 1;
     // animate the row to extend and then add the loader in
@@ -62,6 +74,7 @@ document.getElementById('getResults').addEventListener('click', async (e) => {
     ).then(res => res.json()).then(data => {
         // Once we have recieved the results, we must process it
         console.log(data)
+        var checked = document.getElementById("forecast_prices").checked;
         for (i = 0; i < data.length; i++) {
             // For each row, we need to update the table and add markers
             var current_row = document.getElementById('r' + (i + 1).toString());
@@ -71,6 +84,11 @@ document.getElementById('getResults').addEventListener('click', async (e) => {
             current_elements[3].innerHTML = data[i]['State'];
             current_elements[4].innerHTML = data[i]['Price'];
             current_elements[5].innerHTML = data[i]['monthly_payment'];
+            if (checked){
+                current_elements[6].innerHTML = data[i]['price_change'];
+            } else {
+                current_elements[6].innerHTML = "";
+            }
             // The following code creates a new google maps marker and adds it to the map
             var latlon = data[i]['latlon']
             if (latlon != "") {
