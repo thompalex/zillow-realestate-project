@@ -18,11 +18,12 @@ def get_unique_neighborhoods():
     df_with_unique.to_csv("data/other/unique_neighborhoods.csv")
 
 def add_latlon():
+    positionstack_key = os.getenv('POSITIONSTACK_KEY1')
     conn = http.client.HTTPConnection('api.positionstack.com')
     # Function to get individual lon/lat
     def get_geocode(neighborhood, city,  state):
         params = urllib.parse.urlencode({
-            'access_key': '3e6e9d79072006e5502b0ca27ec0a5bf',
+            'access_key': positionstack_key,
             'query': f'{neighborhood}, {city}' ,
             'region': state,
             'country': 'US',
@@ -44,10 +45,10 @@ def add_latlon():
 
 def add_zipcodes():
     def get_zipcode(latlon):
+        positionstack_key = os.getenv('POSITIONSTACK_KEY2')
         conn = http.client.HTTPConnection('api.positionstack.com')
-
         params = urllib.parse.urlencode({
-            'access_key': 'b552a752eb62669868c9126f52d87eb4',
+            'access_key': positionstack_key,
             'query': latlon,
             })
         conn.request('GET', '/v1/reverse?{}'.format(params))
