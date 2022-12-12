@@ -66,8 +66,8 @@ def add_zipcodes():
     unique_neighborhoods_w_latlon['zipcode'] = unique_neighborhoods_w_latlon.apply(lambda x: get_zipcode(x['latlon']), axis=1)
     unique_neighborhoods_w_latlon.to_csv('data/other/unique_neighborhoods_w_zip_latlon.csv')
 
-def create_zipcode_mapping():
-    get_unique_neighborhoods()
+def create_zipcode_mapping(dataset):
+    get_unique_neighborhoods(dataset)
     add_latlon()
     add_zipcodes()
 
@@ -91,7 +91,7 @@ def generate_dataset():
     data_with_region.reset_index()
     # I highly recommend not ever deleting the mapping file since it would take around 6 hours to recreate, but this is here for completeness
     if not os.path.exists('data/other/unique_neighborhoods_w_zip_latlon.csv'):
-        create_zipcode_mapping()
+        create_zipcode_mapping(data_with_region)
     # Open Neighborhood to latlon and zipcode mapping file
     zip_latlon_mapping = pd.read_csv('data/other/unique_neighborhoods_w_zip_latlon.csv')
     # Merge zipcodes and latlons with zillow data
