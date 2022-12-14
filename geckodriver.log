@@ -1,0 +1,105 @@
+1670876408014	geckodriver	INFO	Listening on 127.0.0.1:34456
+1670876411069	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "--remote-debugging-port" "34457" "--remote-allow-hosts" "localhost" "-no-remote" "-profile" "C:\\Users\\alex_\\AppData\\Local\\Temp\\rust_mozprofile4HIrpW"
+1670876411684	Marionette	INFO	Marionette enabled
+1670876411692	Marionette	INFO	Listening on port 34466
+Read port: 34466
+WebDriver BiDi listening on ws://127.0.0.1:34457
+1670876411894	RemoteAgent	WARN	TLS certificate errors will be ignored for this session
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new NotFoundError("Could not open the file at C:\\Users\\alex_\\AppData\\Local\\Temp\\rust_mozprofile4HIrpW\\search.json.mozlz4", (void 0)))
+DevTools listening on ws://127.0.0.1:34457/devtools/browser/01190c56-a5e8-4785-8090-18030d056987
+JavaScript warning: https://public.tableau.com/vizql/v_202242212061438/javascripts/vqlweb.js, line 49: unreachable code after return statement
+JavaScript warning: https://public.tableau.com/vizql/v_202242212061438/javascripts/vqlweb.js, line 49: unreachable code after return statement
+1670876447352	Marionette	INFO	Stopped listening on port 34466
+console.warn: TopSitesFeed: Failed to fetch data from Contile server: NetworkError when attempting to fetch resource.
+1670876774613	geckodriver	INFO	Listening on 127.0.0.1:34800
+1670876777656	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "--remote-debugging-port" "34801" "--remote-allow-hosts" "localhost" "-no-remote" "-profile" "C:\\Users\\alex_\\AppData\\Local\\Temp\\rust_mozprofileIlFh5V"
+1670876778250	Marionette	INFO	Marionette enabled
+1670876778258	Marionette	INFO	Listening on port 34811
+Read port: 34811
+WebDriver BiDi listening on ws://127.0.0.1:34801
+1670876778443	RemoteAgent	WARN	TLS certificate errors will be ignored for this session
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new NotFoundError("Could not open the file at C:\\Users\\alex_\\AppData\\Local\\Temp\\rust_mozprofileIlFh5V\\search.json.mozlz4", (void 0)))
+DevTools listening on ws://127.0.0.1:34801/devtools/browser/0b80ad03-d030-4f93-83db-d0d88bf1d034
+JavaScript warning: https://public.tableau.com/vizql/v_202242212061438/javascripts/vqlweb.js, line 49: unreachable code after return statement
+JavaScript warning: https://public.tableau.com/vizql/v_202242212061438/javascripts/vqlweb.js, line 49: unreachable code after return statement
+1670876850699	geckodriver	INFO	Listening on 127.0.0.1:35116
+1670876853757	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "--remote-debugging-port" "35117" "--remote-allow-hosts" "localhost" "-no-remote" "-profile" "C:\\Users\\alex_\\AppData\\Local\\Temp\\rust_mozprofileUvqmxD"
+1670876854376	Marionette	INFO	Marionette enabled
+1670876854389	Marionette	INFO	Listening on port 35128
+Read port: 35128
+WebDriver BiDi listening on ws://127.0.0.1:35117
+1670876854585	RemoteAgent	WARN	TLS certificate errors will be ignored for this session
+1670876861103	geckodriver	INFO	Listening on 127.0.0.1:35135
+1670876864160	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "--remote-debugging-port" "35136" "--remote-allow-hosts" "localhost" "-no-remote" "-profile" "C:\\Users\\alex_\\AppData\\Local\\Temp\\rust_mozprofileoHAXBt"
+1670876864736	Marionette	INFO	Marionette enabled
+1670876864746	Marionette	INFO	Listening on port 35146
+Read port: 35146
+WebDriver BiDi listening on ws://127.0.0.1:35136
+1670876864913	RemoteAgent	WARN	TLS certificate errors will be ignored for this session
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new NotFoundError("Could not open the file at C:\\Users\\alex_\\AppData\\Local\\Temp\\rust_mozprofileoHAXBt\\search.json.mozlz4", (void 0)))
+DevTools listening on ws://127.0.0.1:35136/devtools/browser/898100b7-fc14-41ae-ae05-1dfc74a811b1
+JavaScript warning: https://public.tableau.com/vizql/v_202242212061438/javascripts/vqlweb.js, line 49: unreachable code after return statement
+JavaScript warning: https://public.tableau.com/vizql/v_202242212061438/javascripts/vqlweb.js, line 49: unreachable code after return statement
+1670876910771	Marionette	INFO	Stopped listening on port 35146
+console.warn: TopSitesFeed: Failed to fetch data from Contile server: NetworkError when attempting to fetch resource.
+remote-debugging-port" "35354" "--remote-allow-hosts" "localhost" "-no-remote" "-profile" "C:\\Users\\alex_\\AppData\\Local\\Temp\\rust_mozprofileLfvAPC"
+1670876885943	Marionette	INFO	Marionette enabled
+1670876885952	Marionette	INFO	Listening on port 35366
+Read port: 35366
+WebDriver BiDi listening on ws://127.0.0.1:35354
+1670876886137	RemoteAgent	WARN	TLS certificate errors will be ignored for this session
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new NotFoundError("Could not open the file at C:\\Users\\alex_\\AppData\\Local\\Temp\\rust_mozprofileLfvAPC\\search.json.mozlz4", (void 0)))
+DevTools listening on ws://127.0.0.1:35354/devtools/browser/4da89867-b560-401c-850a-14810d5291fa
+JavaScript warning: https://public.tableau.com/vizql/v_202242212061438/javascripts/vqlweb.js, line 49: unreachable code after return statement
+JavaScript warning: https://public.tableau.com/vizql/v_202242212061438/javascripts/vqlweb.js, line 49: unreachable code after return statement
+1670876908094	Marionette	INFO	Stopped listening on port 35366
+console.warn: TopSitesFeed: Failed to fetch data from Contile server: NetworkError when attempting to fetch resource.
+1670877069648	geckodriver	INFO	Listening on 127.0.0.1:35631
+1670877072701	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "--remote-debugging-port" "35632" "--remote-allow-hosts" "localhost" "-no-remote" "-profile" "C:\\Users\\alex_\\AppData\\Local\\Temp\\rust_mozprofiledPOHjP"
+1670877073370	Marionette	INFO	Marionette enabled
+1670877073378	Marionette	INFO	Listening on port 35642
+Read port: 35642
+WebDriver BiDi listening on ws://127.0.0.1:35632
+1670877073555	RemoteAgent	WARN	TLS certificate errors will be ignored for this session
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new NotFoundError("Could not open the file at C:\\Users\\alex_\\AppData\\Local\\Temp\\rust_mozprofiledPOHjP\\search.json.mozlz4", (void 0)))
+DevTools listening on ws://127.0.0.1:35632/devtools/browser/8260cca9-7ab2-4ebd-b691-79c44f4d154a
+JavaScript warning: https://public.tableau.com/vizql/v_202242212061438/javascripts/vqlweb.js, line 49: unreachable code after return statement
+JavaScript warning: https://public.tableau.com/vizql/v_202242212061438/javascripts/vqlweb.js, line 49: unreachable code after return statement
+SourceActor threw an exception: [Exception... "Component returned failure code: 0x80470002 (NS_BASE_STREAM_CLOSED) [nsIInputStream.available]"  nsresult: "0x80470002 (NS_BASE_STREAM_CLOSED)"  location: "JS frame :: resource://devtools/shared/DevToolsUtils.js :: onResponse :: line 571"  data: no]
+Stack: onResponse@resource://devtools/shared/DevToolsUtils.js:571:34
+onStopRequest@resource://gre/modules/NetUtil.jsm:126:18
+Line: 571, column: 0
+console.error: ({})
+JavaScript error: resource://devtools/shared/DevToolsUtils.js, line 571: NS_BASE_STREAM_CLOSED: Component returned failure code: 0x80470002 (NS_BASE_STREAM_CLOSED) [nsIInputStream.available]
+SourceActor threw an exception: [Exception... "Component returned failure code: 0x80470002 (NS_BASE_STREAM_CLOSED) [nsIInputStream.available]"  nsresult: "0x80470002 (NS_BASE_STREAM_CLOSED)"  location: "JS frame :: resource://devtools/shared/DevToolsUtils.js :: onResponse :: line 571"  data: no]
+Stack: onResponse@resource://devtools/shared/DevToolsUtils.js:571:34
+onStopRequest@resource://gre/modules/NetUtil.jsm:126:18
+Line: 571, column: 0
+console.error: ({})
+JavaScript error: resource://devtools/shared/DevToolsUtils.js, line 571: NS_BASE_STREAM_CLOSED: Component returned failure code: 0x80470002 (NS_BASE_STREAM_CLOSED) [nsIInputStream.available]
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 574: NotFoundError: No such JSWindowActor 'DevToolsFrame'
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 574: NotFoundError: No such JSWindowActor 'DevToolsFrame'
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 574: NotFoundError: No such JSWindowActor 'DevToolsFrame'
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 574: NotFoundError: No such JSWindowActor 'DevToolsFrame'
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 574: NotFoundError: No such JSWindowActor 'DevToolsFrame'
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 574: NotFoundError: No such JSWindowActor 'DevToolsFrame'
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 574: NotFoundError: No such JSWindowActor 'DevToolsFrame'
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 574: NotFoundError: No such JSWindowActor 'DevToolsFrame'
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 574: NotFoundError: No such JSWindowActor 'DevToolsFrame'
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 574: NotFoundError: No such JSWindowActor 'DevToolsFrame'
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 574: NotFoundError: No such JSWindowActor 'DevToolsFrame'
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 574: NotFoundError: No such JSWindowActor 'DevToolsFrame'
+1670877260559	Marionette	INFO	Stopped listening on port 35642
+1670877262720	geckodriver	INFO	Listening on 127.0.0.1:35936
+1670877265790	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "--remote-debugging-port" "35937" "--remote-allow-hosts" "localhost" "-no-remote" "-profile" "C:\\Users\\alex_\\AppData\\Local\\Temp\\rust_mozprofile1hipIx"
+1670877266354	Marionette	INFO	Marionette enabled
+1670877266362	Marionette	INFO	Listening on port 35947
+Read port: 35947
+WebDriver BiDi listening on ws://127.0.0.1:35937
+1670877266527	RemoteAgent	WARN	TLS certificate errors will be ignored for this session
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new NotFoundError("Could not open the file at C:\\Users\\alex_\\AppData\\Local\\Temp\\rust_mozprofile1hipIx\\search.json.mozlz4", (void 0)))
+DevTools listening on ws://127.0.0.1:35937/devtools/browser/5bf5e4e8-bb65-4f56-acf4-dca14e541b28
+JavaScript warning: https://public.tableau.com/vizql/v_202242212061438/javascripts/vqlweb.js, line 49: unreachable code after return statement
+JavaScript warning: https://public.tableau.com/vizql/v_202242212061438/javascripts/vqlweb.js, line 49: unreachable code after return statement
+1670877516692	Marionette	INFO	Stopped listening on port 35947
+console.warn: TopSitesFeed: Failed to fetch data from Contile server: NetworkError when attempting to fetch resource.

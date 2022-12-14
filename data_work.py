@@ -71,10 +71,7 @@ def create_zipcode_mapping(dataset):
     add_latlon()
     add_zipcodes()
 
-
-# Generate the project nd from the zillow files and the region mapping
-def generate_dataset():
-    region_mapping = pd.read_csv('data/other/states.csv')
+def merge_zillow_data():
     # Concatenate each of the csvs that correspond to individual bedroom amounts
     arr = []
     for i in range(1, 6):
@@ -83,6 +80,13 @@ def generate_dataset():
         nd['bedrooms'] = i
         arr.append(nd)
     zillow_data = pd.concat(arr, axis=0)
+    return zillow_data
+
+# Generate the project dataset from the zillow files and the region mapping
+def generate_dataset():
+    region_mapping = pd.read_csv('data/other/states.csv')
+    # Load in and combine zillow files
+    zillow_data = merge_zillow_data()
     # Merge with region mapping to get region name
     data_with_region = pd.merge(zillow_data, region_mapping, left_on="State", right_on="State")
     # Drop unnecessary columns
