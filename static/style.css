@@ -1,68 +1,67 @@
-
 @keyframes expand {
-from {
-    height: 0px
-}
+    from {
+        height: 0px
+    }
 
-to {
-    height: 700px
-}
+    to {
+        height: 700px
+    }
 }
 
 @keyframes showTable {
-0% {
-    opacity: 0;
-}
+    0% {
+        opacity: 0;
+    }
 
-100% {
-    opacity: 1;
-}
+    100% {
+        opacity: 1;
+    }
 }
 
 #map {
-height: 100%;
+    height: 100%;
 }
 
 #title2 {
-margin-top: 3%;
+    margin-top: 3%;
 }
 
 .tableRowAnimate {
-animation-name: expand;
-animation-duration: 1s;
-animation-timing-function: linear;
-animation-iteration-count: 1;
-animation-fill-mode: forwards;
+    animation-name: expand;
+    animation-duration: 1s;
+    animation-timing-function: linear;
+    animation-iteration-count: 1;
+    animation-fill-mode: forwards;
 }
 
 .tableFadeIn {
-animation-name: showTable;
-animation-duration: 1s;
-animation-timing-function: linear;
-animation-iteration-count: 1;
-animation-fill-mode: forwards;
-animation-delay: 1s;
+    animation-name: showTable;
+    animation-duration: 1s;
+    animation-timing-function: linear;
+    animation-iteration-count: 1;
+    animation-fill-mode: forwards;
+    animation-delay: 1s;
 }
 
 .loader {
-border: 16px solid #f3f3f3;
-/* Light grey */
-border-top: 16px solid #3498db;
-/* Blue */
-border-radius: 50%;
-width: 120px;
-height: 120px;
-animation: spin 2s linear infinite;
+    border: 16px solid #f3f3f3;
+    /* Light grey */
+    border-top: 16px solid #3498db;
+    /* Blue */
+    border-radius: 50%;
+    width: 120px;
+    height: 120px;
+    animation: spin 2s linear infinite;
 }
 
 @keyframes spin {
-0% {
-    transform: rotate(0deg);
-}
+    0% {
+        transform: rotate(0deg);
+    }
 
-100% {
-    transform: rotate(360deg);
-}
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 /* 
@@ -70,7 +69,7 @@ animation: spin 2s linear infinite;
 */
 html,
 body {
-height: 100%;
-margin: 0;
-padding: 0;
+    height: 100%;
+    margin: 0;
+    padding: 0;
 }
