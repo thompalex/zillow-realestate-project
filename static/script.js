@@ -119,7 +119,7 @@ document.getElementById('getResults').addEventListener('click', async (e) => {
             var bounds = new google.maps.LatLngBounds();
             if (data['dfs'][0].length > 0){
                 var top_five = data['dfs'][0];
-                document.getElementById('table').innerHTML = data['tables'][1];
+                document.getElementById('table').innerHTML = data['tables'][0];
                 for (i=0; i < top_five.length; i++){
                     latlon = top_five[i]['latlon'];
                     title = top_five[i]['Neighborhood'];
