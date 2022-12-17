@@ -148,11 +148,18 @@ def filter_data(data, args):
     with_all['Monthly Payment'] = with_all['Price'].apply(lambda x: format_money(-1 * npf.pmt(rate / 100 / 12, 12 * timeline,x)))
     return with_all
     
+# Format the frontend output
+def format_output(filtered_df):
+    # Define cols to be shown to the frontend user
+    frontend_cols = ['Neighborhood', 'City', 'State Name', 'Price', 'Monthly Payment', 'Price Change']
+    # Generate two tables and two dictionaries for output to the frontend
+    res = [filtered_df.head(5), filtered_df.tail(5)]
+    tables = [df.to_html(index=False, columns=frontend_cols, justify="left", classes='table my-auto') for df in res]
+    dfs = [df.to_dict('records') for df in res]
+    return tables, dfs, None
 
 # Make a query from the frontend
 def make_query(args):
-    # Define cols to be shown to the frontend user
-    frontend_cols = ['Neighborhood', 'City', 'State Name', 'Price', 'Monthly Payment', 'Price Change']
     # If the necessary nd has not been generated yet, create it
     if not os.path.exists('data/project_dataset.csv'):
         generate_dataset()
@@ -177,11 +184,7 @@ def make_query(args):
     # Format the numbers into money-like strings
     filtered_df['Price Change'] = filtered_df['Price Change'].apply(lambda x: format_money(x))
     filtered_df['Price'] = filtered_df['Price'].apply(lambda x: format_money(x))
-    # Generate two tables and two dictionaries for output to the frontend
-    res = [filtered_df.head(5), filtered_df.tail(5)]
-    tables = [df.to_html(index=False, columns=frontend_cols, justify="left", classes='table my-auto') for df in res]
-    dfs = [df.to_dict('records') for df in res]
-    return tables, dfs, None
+    return format_output(filtered_df)
 
 ### Test statements for these methods ###
 if __name__ == '__main__':
