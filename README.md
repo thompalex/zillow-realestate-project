@@ -1,4 +1,4 @@
-# Zillow Real Estate Project
+# Zillow Real Estate Project By Alex Thompson, Rohil Navani, and Hailey Nguyen
 
 If you wish to run our project, first create a .env file in the project directory with a google maps api key and two positionstack api keys as follows:
 
