@@ -6,14 +6,14 @@ import os
 from search import Limit
 import yaml
 
-
+# Format a number into a dollar amount
 def format_money(amount):
     formatted_val = '${:,.2f}'.format(abs(amount))
     if round(amount, 2) < 0:
         return f'-{formatted_val}'
     return formatted_val
 
-# This is where the actual data stuff is done for the most part
+# Use this function to get a list of all unique neighborhoods in the zillow data
 def get_unique_neighborhoods(dataset):
     unique_neighborhoods = set()
     df_with_unique = pd.DataFrame(columns=['Neighborhood', 'City', 'State'])
@@ -23,9 +23,11 @@ def get_unique_neighborhoods(dataset):
             unique_neighborhoods.add(t[1])
             df_with_unique.loc[length] = [t[2], t[4], t[9]]
             length += 1
+    # Output the unique neighborhoods to this file
     df_with_unique.to_csv("data/other/unique_neighborhoods.csv")
 
 def add_latlon():
+    # Connect to positionstack api
     positionstack_key = os.getenv('POSITIONSTACK_KEY1')
     conn = http.client.HTTPConnection('api.positionstack.com')
     # Function to get individual lon/lat
@@ -45,7 +47,9 @@ def add_latlon():
             return f'{api_result["data"][0]["latitude"]}, {api_result["data"][0]["longitude"]}'
         else:
             return ""
+    # Load in list of unique neighborhoods
     unique_neighborhoods = pd.read_csv('data/other/unique_neighborhoods.csv')
+    # Query positionstack for the latlon of each neighborhood
     unique_neighborhoods['latlon'] = unique_neighborhoods.apply(lambda x: get_geocode(x['Neighborhood'], x['City'], x['State']), axis=1)
     unique_neighborhoods.to_csv('data/other/unique_neighborhoods_with_latlon.csv')
 
@@ -53,8 +57,10 @@ def add_latlon():
 
 def add_zipcodes():
     def get_zipcode(latlon):
+        # Connect to positionstack api
         positionstack_key = os.getenv('POSITIONSTACK_KEY2')
         conn = http.client.HTTPConnection('api.positionstack.com')
+        # Create parameters
         params = urllib.parse.urlencode({
             'access_key': positionstack_key,
             'query': latlon,
@@ -70,16 +76,20 @@ def add_zipcodes():
                 return ""
         except:
             return ""
+    # Open the set of neighborhoods with latlons
     unique_neighborhoods_w_latlon = pd.read_csv('data/other/unique_neighborhoods_with_latlon.csv')
+    # Get zipcodes from positionstack using latlons
     unique_neighborhoods_w_latlon['zipcode'] = unique_neighborhoods_w_latlon.apply(lambda x: get_zipcode(x['latlon']), axis=1)
     unique_neighborhoods_w_latlon.to_csv('data/other/unique_neighborhoods_w_zip_latlon.csv')
 
 def create_zipcode_mapping(dataset):
+    # Create zipcode mapping starting with our zillow data
     get_unique_neighborhoods(dataset)
     add_latlon()
     add_zipcodes()
 
 def merge_zillow_data(arg_format):
+    # Get the options for numbers of beds and merge their files in
     list_numbeds = arg_format['beds']['data']
     # Concatenate each of the csvs that correspond to individual bedroom amounts
     arr = []
