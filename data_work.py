@@ -151,6 +151,9 @@ def filter_data(data, args):
 def format_output(filtered_df):
     # Define cols to be shown to the frontend user
     frontend_cols = ['Neighborhood', 'City', 'State Name', 'Price', 'Monthly Payment', 'Price Change']
+    # Format the numbers into money-like strings
+    filtered_df['Price Change'] = filtered_df['Price Change'].apply(lambda x: format_money(x))
+    filtered_df['Price'] = filtered_df['Price'].apply(lambda x: format_money(x))
     # Generate two tables and two dictionaries for output to the frontend
     res = [filtered_df.head(5), filtered_df.tail(5)]
     tables = [df.to_html(index=False, columns=frontend_cols, justify="left", classes='table my-auto') for df in res]
@@ -180,9 +183,6 @@ def make_query(args):
         filtered_df.sort_values(by=['Price'], ascending = False, inplace = True)
     else:
         filtered_df.sort_values(by=['Price Change'], ascending=False, inplace = True)
-    # Format the numbers into money-like strings
-    filtered_df['Price Change'] = filtered_df['Price Change'].apply(lambda x: format_money(x))
-    filtered_df['Price'] = filtered_df['Price'].apply(lambda x: format_money(x))
     return format_output(filtered_df)
 
 ### Test statements for these methods ###
