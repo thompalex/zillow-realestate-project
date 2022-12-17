@@ -15,7 +15,7 @@ class Limit:
             errorList = []
             for key, item in param.items():
                 value = self.search_param[key]
-                if re.fullmatch(value.get_format(), item) or item not in value.get_data():
+                if (not re.fullmatch(value.get_format(), item) and item not in value.get_data()):
                     errorList.append(value.get_error())
             return (param, None) if len(errorList) == 0 else (None, errorList)
 

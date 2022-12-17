@@ -5,6 +5,7 @@ import json
 import os
 from search import Limit
 import yaml
+import re
 
 # Format a number into a dollar amount
 def format_money(amount):
@@ -131,21 +132,27 @@ def generate_dataset():
     end_data.to_csv('data/project_dataset.csv', index=False)
 
 
-def filter_data(data, args):
-    # Preprocess the arguments
-    beds = int(args['beds'])
-    region = args['region'] 
-    timeline = int(args['timeline'].split()[0])
-    rate = sum([int(x.strip().replace('%','')) for x in args['rate'].split('-')]) / 2
-    price = tuple([int(x.strip(' $').replace(',', '')) for x in args['price'].split('-')])
-    bottom_price, top_price = price
-    # Each of the four following lines filters out results that do not adhere to the inputs
-    with_region = data[data['Region'] == region]
-    with_bedrooms = with_region[with_region['Beds'] == beds]
-    with_all = with_bedrooms.loc[(with_bedrooms['Price'] >= bottom_price) & (with_bedrooms['Price']  <= top_price)].copy()
-    # Get mortgage rate and timeline to calculate monthly payment using numpy_financial
-    with_all['Monthly Payment'] = with_all['Price'].apply(lambda x: format_money(-1 * npf.pmt(rate / 100 / 12, 12 * timeline,x)))
-    return with_all
+def filter_data(data, args, param_format):
+    # For each parameter of user input in our configuration
+    for key in param_format:
+        # If we are checking for equality or a range, then we can process the query here
+        if param_format[key]["comp"] == "equal":
+            pattern = re.compile(param_format[key]["format"])
+            m = pattern.search(args[key])
+            match_item = m.groups(0)[0]
+            if match_item.isdigit():
+                match_item = int(match_item)
+            data = data[data[param_format[key]["col"]] == match_item]
+        elif param_format[key]['comp'] == "range":
+            pattern = re.compile(param_format[key]["format"])
+            m = pattern.search(args[key])
+            bottom, top = [int(x) for x in m.groups()]
+            data = data.loc[(data[param_format[key]['col']] >= bottom) & (data[param_format[key]['col']] <= top)]
+    # For these params, we just want to calculate the estimated monthly payment
+    rate = int(re.match(param_format['rate']['format'], args['rate']).groups()[0])
+    timeline = int(re.match(param_format['timeline']['format'], args['timeline']).groups()[0])
+    data['Monthly Payment'] = data['Price'].apply(lambda x: format_money(-1 * npf.pmt(rate / 100 / 12, 12 * timeline,x)))
+    return data
     
 # Format the frontend output
 def format_output(filtered_df):
@@ -175,7 +182,7 @@ def make_query(args):
     if not args:
         return None, None, errorLog
     # Filter the data based on the user's arguments
-    filtered_df = filter_data(data, args)
+    filtered_df = filter_data(data, args, parameter)
     # Calculate forecasted price changes
     filtered_df['Price Change'] = filtered_df.apply(lambda x: x['Price'] * x['forecast'] / 100, axis=1)
     # Sort the data based on the user's input
@@ -192,7 +199,8 @@ if __name__ == '__main__':
             'region': 'Northeast',
             'beds': "1",
             'price': '$1000000 - $1500000',
-            'rate': '4% - 5%',
+            'rate': '4%',
             'timeline': '30 years',
             'forecast': "True"
         })
+    print(result)
