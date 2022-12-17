@@ -1,0 +1,15 @@
+region_mapping:
+  cols_to_use: ["State Name", "State", "Region"]
+  left_on: ['State']
+  right_on: ['State']
+  how: 'inner'
+  path: "data/other/states.csv"
+pricing_forecasts:
+  cols_to_use: ["RegionName", "2023-10-31"]
+  left_on: ['zipcode']
+  right_on: ['RegionName']
+  how: 'left'
+  path: "data/zillow_data/pricing_forecast.csv"
+final:
+  reformatting: [["Price", "2022-10-31"], ["Zipcode", "RegionName_y"], ["forecast", "2023-10-31"]]
+  final_cols: ['Neighborhood','latlon','Zipcode','RegionID','State','City','Metro','Price','Beds','Region','State Name', 'forecast']

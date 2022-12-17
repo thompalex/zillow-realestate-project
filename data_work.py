@@ -103,33 +103,31 @@ def merge_zillow_data(arg_format):
 
 # Generate the project dataset from the zillow files and the region mapping
 def generate_dataset():
-    # Define the final cols of the dataframe that we want
-    final_cols = ['Neighborhood','latlon','Zipcode','RegionID','State','City','Metro','Price','Beds','Region','State Name', 'forecast']
     # Get the format of the arguments to ensure that we get the right files
     arg_format = yaml.safe_load(open('config_param.yml', 'rb'))
-    # Open necessary data files
-    region_mapping = pd.read_csv('data/other/states.csv')
-    price_forecasts = pd.read_csv('data/zillow_data/pricing_forecast.csv', usecols=["RegionName", "2023-10-31"])
+    data_format = yaml.safe_load(open('config_data.yml', 'rb'))
     # Load in and combine zillow files
     zillow_data = merge_zillow_data(arg_format)
     # I highly recommend not ever deleting the mapping file since it would take around 6 hours to recreate, but this is here for completeness
     if not os.path.exists('data/other/unique_neighborhoods_w_zip_latlon.csv'):
         create_zipcode_mapping(zillow_data)
     # Open Neighborhood to latlon and zipcode mapping file
-    zip_latlon_mapping = pd.read_csv('data/other/unique_neighborhoods_w_zip_latlon.csv')
-    # Merge with region mapping to get region name
-    data_with_region = pd.merge(zillow_data, region_mapping, left_on="State", right_on="State")
+    zip_latlon_mapping = pd.read_csv('data/other/unique_neighborhoods_w_zip_latlon.csv', usecols=["Neighborhood","City","latlon","zipcode"])
     # Merge zipcodes and latlons with zillow data
-    data_w_zip_latlon = pd.merge(zip_latlon_mapping, data_with_region, left_on=['Neighborhood', 'State', 'City'], right_on=['RegionName', 'State Name', 'City'])
-    # Merge price forecasts into project dataset
-    complete_df = pd.merge(data_w_zip_latlon, price_forecasts, left_on='zipcode', right_on='RegionName', how='left')
-    # Reformat dataset
-    complete_df['Price'] = complete_df['2022-10-31']
-    complete_df['State'] = complete_df['State_y']
-    complete_df['Zipcode'] = complete_df['RegionName_y']
-    complete_df['forecast'] = complete_df['2023-10-31']
-    complete_df = complete_df[final_cols]
-    complete_df.to_csv('data/project_dataset.csv', index=False)
+    start_data = pd.merge(zip_latlon_mapping, zillow_data, left_on=['Neighborhood','City'], right_on=['RegionName', 'City'], left_index=False, right_index=False)
+    # For each dataset in the configuration, add it to the project dataset
+    for key in data_format:
+        if key != "final":
+            dataset_config = data_format[key]
+            dataset = pd.read_csv(dataset_config['path'], usecols=dataset_config['cols_to_use'])
+            start_data = pd.merge(start_data, dataset, left_on=dataset_config['left_on'], right_on=dataset_config['right_on'], how=dataset_config['how'])
+    # Get the final configuration for the dataset and run any of the column name changes required
+    final_config = data_format['final']
+    for source, dest in final_config['reformatting']:
+        start_data[source] = start_data[dest]
+    # Perform final dataset formatting to omitt unneccessary columns
+    end_data = start_data[final_config['final_cols']]
+    end_data.to_csv('data/project_dataset.csv', index=False)
 
 
 def filter_data(data, args):
@@ -139,10 +137,10 @@ def filter_data(data, args):
     timeline = int(args['timeline'].split()[0])
     rate = sum([int(x.strip().replace('%','')) for x in args['rate'].split('-')]) / 2
     price = tuple([int(x.strip(' $').replace(',', '')) for x in args['price'].split('-')])
+    bottom_price, top_price = price
     # Each of the four following lines filters out results that do not adhere to the inputs
     with_region = data[data['Region'] == region]
     with_bedrooms = with_region[with_region['Beds'] == beds]
-    bottom_price, top_price = price
     with_all = with_bedrooms.loc[(with_bedrooms['Price'] >= bottom_price) & (with_bedrooms['Price']  <= top_price)].copy()
     # Get mortgage rate and timeline to calculate monthly payment using numpy_financial
     with_all['Monthly Payment'] = with_all['Price'].apply(lambda x: format_money(-1 * npf.pmt(rate / 100 / 12, 12 * timeline,x)))
@@ -192,10 +190,8 @@ if __name__ == '__main__':
     result = make_query({
             'region': 'Northeast',
             'beds': "1",
-            'price': '800,000 - $1,000,000',
+            'price': '$1000000 - $1500000',
             'rate': '4% - 5%',
             'timeline': '30 years',
-            'forecast': True
+            'forecast': "True"
         })
-
-    print(result)
