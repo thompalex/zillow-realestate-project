@@ -99,6 +99,7 @@ def merge_zillow_data(arg_format):
         nd['Beds'] = int(i)
         arr.append(nd)
     zillow_data = pd.concat(arr, axis=0)
+    zillow_data = zillow_data[zillow_data['2022-10-31'].notna()]
     return zillow_data
 
 # Generate the project dataset from the zillow files and the region mapping
