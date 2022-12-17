@@ -6,6 +6,13 @@ import os
 from search import Limit
 import yaml
 
+
+def format_money(amount):
+    formatted_val = '${:,.2f}'.format(abs(amount))
+    if round(amount, 2) < 0:
+        return f'-{formatted_val}'
+    return formatted_val
+
 # This is where the actual data stuff is done for the most part
 def get_unique_neighborhoods(dataset):
     unique_neighborhoods = set()
@@ -79,7 +86,7 @@ def merge_zillow_data(arg_format):
     for i in list_numbeds:
         nd = pd.read_csv(f'data/zillow_data/{i}_bedroom.csv')
         nd = nd[['RegionID', 'RegionName', 'State', 'City', 'Metro', '2022-10-31']]
-        nd['bedrooms'] = int(i)
+        nd['Beds'] = int(i)
         arr.append(nd)
     zillow_data = pd.concat(arr, axis=0)
     return zillow_data
@@ -103,11 +110,11 @@ def generate_dataset():
     # Merge price forecasts into project dataset
     complete_df = pd.merge(data_w_zip_latlon, price_forecasts, left_on='zipcode', right_on='RegionName', how='left')
     # Reformat dataset
-    complete_df['price'] = complete_df['2022-10-31']
-    complete_df['state'] = complete_df['State_y']
-    complete_df['zipcode'] = complete_df['RegionName_y']
+    complete_df['Price'] = complete_df['2022-10-31']
+    complete_df['State'] = complete_df['State_y']
+    complete_df['Zipcode'] = complete_df['RegionName_y']
     complete_df['forecast'] = complete_df['2023-10-31']
-    complete_df = complete_df[['Neighborhood','latlon','zipcode','RegionID','state','City','Metro','price','bedrooms','Region','State Name', 'forecast']]
+    complete_df = complete_df[['Neighborhood','latlon','Zipcode','RegionID','State','City','Metro','Price','Beds','Region','State Name', 'forecast']]
     complete_df.to_csv('data/project_dataset.csv', index=False)
 
 
@@ -119,11 +126,11 @@ def filter_data(data, args):
     price = tuple([int(x.strip(' $').replace(',', '')) for x in args['price'].split('-')])
     # Each of the four following lines filters out results that do not adhere to the inputs
     with_region = data[data['Region'] == region]
-    with_bedrooms = with_region[with_region['bedrooms'] == beds]
+    with_bedrooms = with_region[with_region['Beds'] == beds]
     bottom_price, top_price = price
-    with_all = with_bedrooms.loc[(with_bedrooms['price'] >= bottom_price) & (with_bedrooms['price']  <= top_price)].copy()
+    with_all = with_bedrooms.loc[(with_bedrooms['Price'] >= bottom_price) & (with_bedrooms['Price']  <= top_price)].copy()
     # Get mortgage rate and timeline to calculate monthly payment using numpy_financial
-    with_all['Monthly Payment'] = with_all['price'].apply(lambda x: f'${round(-1 * npf.pmt(rate / 100 / 12, 12 * timeline,x), 2):,.2f}')
+    with_all['Monthly Payment'] = with_all['Price'].apply(lambda x: format_money(-1 * npf.pmt(rate / 100 / 12, 12 * timeline,x)))
     return with_all
     
 
@@ -142,18 +149,15 @@ def make_query(args):
         return None, None, errorLog
     filtered_df = filter_data(data, args)
     # Calculate forecasted price changes
-    filtered_df['price_change'] = filtered_df.apply(lambda x: x['price'] * x['forecast'] / 100, axis=1)
+    filtered_df['Price Change'] = filtered_df.apply(lambda x: x['Price'] * x['forecast'] / 100, axis=1)
     if args['forecast'] == "False":
-        filtered_df.sort_values(by=['price'], ascending = False, inplace = True)
+        filtered_df.sort_values(by=['Price'], ascending = False, inplace = True)
     else:
-        filtered_df.sort_values(by=['price_change'], ascending=False, inplace = True)
-    filtered_df['Price Change'] = filtered_df['price_change'].apply(lambda x: f'${x:,.2f}')
-    filtered_df['Price'] = filtered_df['price'].apply(lambda x: f'${x:,.2f}')
-    filtered_df['Beds'] = filtered_df['bedrooms']
-    filtered_df['Zipcode'] = filtered_df['zipcode']
-    filtered_df = filtered_df[['Neighborhood', 'Zipcode', 'City', 'State Name', 'Price', 'Monthly Payment', 'Price Change', 'latlon']]
+        filtered_df.sort_values(by=['Price Change'], ascending=False, inplace = True)
+    filtered_df['Price Change'] = filtered_df['Price Change'].apply(lambda x: format_money(x))
+    filtered_df['Price'] = filtered_df['Price'].apply(lambda x: format_money(x))
     res = [filtered_df.head(5), filtered_df.tail(5)]
-    tables = [df.to_html(index=False, columns=['Neighborhood', 'Zipcode', 'City', 'State Name', 'Price', 'Monthly Payment', 'Price Change'], justify="left", classes='table my-auto') for df in res]
+    tables = [df.to_html(index=False, columns=['Neighborhood', 'City', 'State Name', 'Price', 'Monthly Payment', 'Price Change'], justify="left", classes='table my-auto') for df in res]
     dfs = [df.to_dict('records') for df in res]
     return tables, dfs, None
 
