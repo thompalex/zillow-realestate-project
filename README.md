@@ -3,7 +3,9 @@
 If you wish to run our project, first create a .env file in the project directory with a google maps api key and two positionstack api keys as follows:
 
 POSITIONSTACK_KEY1='<positionstack_api_key1>'
+
 POSITIONSTACK_KEY2='<positionstack_api_key2>'
+
 GOOGLE_MAPS_KEY='<google_maps_api_key>'
 
 Then, create a new virtual environment and enter it with the following commands:
