@@ -93,7 +93,11 @@ def merge_zillow_data(arg_format):
 
 # Generate the project dataset from the zillow files and the region mapping
 def generate_dataset():
+    # Define the final cols of the dataframe that we want
+    final_cols = ['Neighborhood','latlon','Zipcode','RegionID','State','City','Metro','Price','Beds','Region','State Name', 'forecast']
+    # Get the format of the arguments to ensure that we get the right files
     arg_format = yaml.safe_load(open('config_param.yml', 'rb'))
+    # Open necessary data files
     region_mapping = pd.read_csv('data/other/states.csv')
     price_forecasts = pd.read_csv('data/zillow_data/pricing_forecast.csv', usecols=["RegionName", "2023-10-31"])
     # Load in and combine zillow files
@@ -114,11 +118,12 @@ def generate_dataset():
     complete_df['State'] = complete_df['State_y']
     complete_df['Zipcode'] = complete_df['RegionName_y']
     complete_df['forecast'] = complete_df['2023-10-31']
-    complete_df = complete_df[['Neighborhood','latlon','Zipcode','RegionID','State','City','Metro','Price','Beds','Region','State Name', 'forecast']]
+    complete_df = complete_df[final_cols]
     complete_df.to_csv('data/project_dataset.csv', index=False)
 
 
 def filter_data(data, args):
+    # Preprocess the arguments
     beds = int(args['beds'])
     region = args['region'] 
     timeline = int(args['timeline'].split()[0])
@@ -136,28 +141,35 @@ def filter_data(data, args):
 
 # Make a query from the frontend
 def make_query(args):
+    # Define cols to be shown to the frontend user
+    frontend_cols = ['Neighborhood', 'City', 'State Name', 'Price', 'Monthly Payment', 'Price Change']
     # If the necessary nd has not been generated yet, create it
     if not os.path.exists('data/project_dataset.csv'):
         generate_dataset()
     # Read in the compiled data
     data = pd.read_csv('data/project_dataset.csv').fillna(0)
+    # Load in user arguments and check for errors in their input
     parameter = open('config_param.yml', 'rb')
     parameter = yaml.safe_load(parameter)
     queryLimit = Limit(**parameter)
     args, errorLog = queryLimit.check_param(args)
     if not args:
         return None, None, errorLog
+    # Filter the data based on the user's arguments
     filtered_df = filter_data(data, args)
     # Calculate forecasted price changes
     filtered_df['Price Change'] = filtered_df.apply(lambda x: x['Price'] * x['forecast'] / 100, axis=1)
+    # Sort the data based on the user's input
     if args['forecast'] == "False":
         filtered_df.sort_values(by=['Price'], ascending = False, inplace = True)
     else:
         filtered_df.sort_values(by=['Price Change'], ascending=False, inplace = True)
+    # Format the numbers into money-like strings
     filtered_df['Price Change'] = filtered_df['Price Change'].apply(lambda x: format_money(x))
     filtered_df['Price'] = filtered_df['Price'].apply(lambda x: format_money(x))
+    # Generate two tables and two dictionaries for output to the frontend
     res = [filtered_df.head(5), filtered_df.tail(5)]
-    tables = [df.to_html(index=False, columns=['Neighborhood', 'City', 'State Name', 'Price', 'Monthly Payment', 'Price Change'], justify="left", classes='table my-auto') for df in res]
+    tables = [df.to_html(index=False, columns=frontend_cols, justify="left", classes='table my-auto') for df in res]
     dfs = [df.to_dict('records') for df in res]
     return tables, dfs, None
 
