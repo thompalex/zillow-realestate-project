@@ -2,8 +2,13 @@ from flask import Flask, render_template, request
 import os
 import json
 from data_work import make_query
+from search import Limit
+import yaml
 
-app = Flask(__name__)
+app = Flask(__name__, 
+            static_folder='./static', 
+            template_folder='./templates',
+            )
 
 # Backend to host our app
 
@@ -11,7 +16,10 @@ app = Flask(__name__)
 @app.route("/")
 def homepage():
     google_api_key = os.getenv('GOOGLE_MAPS_KEY')
-    return render_template('form_with_map.html', google_api_key=google_api_key)
+    parameter = open('config_param.yml', 'rb')
+    parameter = yaml.safe_load(parameter)
+    queryLimit = Limit(**parameter)
+    return render_template('form_with_map.html', google_api_key=google_api_key, parameter = queryLimit.param())
 
 
 # The frontend makes calls to the API route here
@@ -19,8 +27,11 @@ def homepage():
 @app.route("/api", methods=["POST"])
 def get_suggestion():
     args = request.get_json()
-    res = make_query(args).to_dict('records')
-    return json.dumps(res)
+    print(args)
+    tables, dfs, errorLog = make_query(args)
+    if tables is None:
+        return errorLog
+    return json.dumps({"tables": tables, "dfs": dfs})
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0')

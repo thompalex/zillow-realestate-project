@@ -1,0 +1,30 @@
+region: 
+  name: 'Region'
+  data: ['Northeast', 'South', 'West', 'Mideast']
+  format: r'((\bNortheast\b)|(\bSouth\b)|(\bWest\b)|(\bMideast\b))'
+  error: 'We cannot find your region'
+price: 
+  name: 'Price'
+  data: ['$0 - $100000' , '$100000 - $300000' , '$300000 - $600000' , '$600000 - $1000000' , '$1000000 - $1500000' , '$1500000 - $10000000']
+  format: r'^\$\d+ - \$\d+$'
+  error: 'We cannot process your price range'
+beds: 
+  name: 'Number of Beds'
+  data: ['1', '2', '3', '4', '5']
+  format: r'^[12345]$'
+  error: 'We cannot process your number of beds'
+rate: 
+  name: 'Mortgage Rate'
+  data: ['6% - 7%', '5% - 6%', '4% - 5%', '2% - 4%']
+  format: r'^\d+% - \d+%$'
+  error: 'We cannot process your mortgage rate'
+timeline: 
+  name: 'Timeline'
+  data: ['30 years', '20 years', '15 years', '10 years', '7 years', '5 years' ,'3 years']
+  format: r'^\d+ years$'
+  error: 'We cannot process your timeline'
+forecast: 
+  name: 'Sort By Price Forecast'
+  data: ['True', 'False']
+  format: r'((\bTrue\b)|(\bFalse\b))'
+  error: 'Price Forecast must be a boolean value'

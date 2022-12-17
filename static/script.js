@@ -1,7 +1,8 @@
 
 let map;
 let markers = [];
-let count = 0;
+let resultDisplay = false;
+let errorDisplay = false;
 
 function initMap() {
     // create the JS map
@@ -10,8 +11,6 @@ function initMap() {
         zoom: 4,
     });
 }
-
-window.initMap = initMap;
 
 // Ensure that we retain selected values in dropdowns
 document.getElementsByName("dropDownItem").forEach(item => item.addEventListener('click', (e) => {
@@ -23,6 +22,42 @@ document.getElementsByName("dropDownItem").forEach(item => item.addEventListener
 function delay(time) {
     return new Promise(resolve => setTimeout(resolve, time));
 }
+
+
+function addLocation(latlon, title, infowindow, bounds) {
+
+    if (latlon != "") {
+        var latlon_split = latlon.split(',')
+        var maps_latlng = { lat: +(latlon_split[0]), lng: +(latlon_split[1]) }
+        var marker = new google.maps.Marker({
+            position: maps_latlng,
+            map: map,
+            title: title,
+        });
+
+        bounds.extend(marker.getPosition());
+        google.maps.event.addListener(marker, 'click', (function (marker, i) {
+            return function () {
+                infowindow.setContent(marker.getTitle());
+                infowindow.open(map, marker);
+                map.setZoom(12);
+                map.setCenter(marker.getPosition());
+            }
+        })(marker, i));
+
+        google.maps.event.addListener(marker, 'dblclick', (function (marker, i) {
+            return function () {
+                map.setZoom(30);
+                map.setCenter(marker.getPosition());
+            }
+        })(marker, i));
+
+        markers.push(marker)
+    }
+    map.fitBounds(bounds);
+}
+
+window.initMap = initMap;
 
 // This is where we actually query and process results, changing the HTML as needed
 document.getElementById('getResults').addEventListener('click', async (e) => {
@@ -38,27 +73,32 @@ document.getElementById('getResults').addEventListener('click', async (e) => {
     for (i = 0; i < dropdowns.length; i++) {
         d[dropdowns[i].children[0].name] = dropdowns[i].children[0].textContent;
     }
-    d['forecast'] = document.getElementById("forecast_prices").checked;
+    if (errorDisplay) {
+        document.getElementById('titlelog').classList.remove('tableFadeIn');
+        const errorlog = document.getElementById('errorlog');
+        errorlog.classList.remove('tableFadeIn');
+        errorlog.innerHTML = '';
+        document.getElementById('loader').style.height = "120px";
+        errorDisplay = false;
+    }
     // If we have already run a query, our animations need to be adjusted
-    if (count > 0) {
+    if (resultDisplay) {
+        document.getElementById('table2').getElementsByClassName('table')[0].innerHTML = ''
+        document.getElementById('table').getElementsByClassName('table')[0].innerHTML = ''
         document.getElementById('title1').classList.remove('tableFadeIn');
         document.getElementById('title2').classList.remove('tableFadeIn');
         document.getElementById('table').classList.remove('tableFadeIn');
         document.getElementById('table2').classList.remove('tableFadeIn');
         document.getElementById('loader').style.height = "120px";
+        resultDisplay = false
     }
-    if (d['forecast']){
+    if (d['forecast'] == "True") {
         document.getElementById('title1').innerHTML = "Highest Price Changes";
         document.getElementById('title2').innerHTML = "Lowest Price Changes";
-        document.getElementById('forecast_col1').innerHTML = "Estimated YoY Price Change";
-        document.getElementById('forecast_col2').innerHTML = "Estimated YoY Price Change";
     } else {
         document.getElementById('title1').innerHTML = "Most Expensive";
         document.getElementById('title2').innerHTML = "Least Expensive";
-        document.getElementById('forecast_col1').innerHTML = "";
-        document.getElementById('forecast_col2').innerHTML = "";
     }
-    count += 1;
     // animate the row to extend and then add the loader in
     document.getElementById('tablerow').classList.add('tableRowAnimate');
     await delay(1000)
@@ -74,40 +114,70 @@ document.getElementById('getResults').addEventListener('click', async (e) => {
     ).then(res => res.json()).then(data => {
         // Once we have recieved the results, we must process it
         console.log(data)
-        var checked = document.getElementById("forecast_prices").checked;
-        for (i = 0; i < data.length; i++) {
-            // For each row, we need to update the table and add markers
-            var current_row = document.getElementById('r' + (i + 1).toString());
-            var current_elements = current_row.children;
-            current_elements[1].innerHTML = data[i]['Neighborhood'];
-            current_elements[2].innerHTML = data[i]['City'];
-            current_elements[3].innerHTML = data[i]['State'];
-            current_elements[4].innerHTML = data[i]['Price'];
-            current_elements[5].innerHTML = data[i]['monthly_payment'];
-            if (checked){
-                current_elements[6].innerHTML = data[i]['price_change'];
+        if (data['tables'] && data['dfs']){
+            var infowindow = new google.maps.InfoWindow();
+            var bounds = new google.maps.LatLngBounds();
+            if (data['dfs'][0].length > 0){
+                var top_five = data['dfs'][0];
+                document.getElementById('table').innerHTML = data['tables'][1];
+                for (i=0; i < top_five.length; i++){
+                    latlon = top_five[i]['latlon'];
+                    title = top_five[i]['Neighborhood'];
+                    if (latlon != 0){
+                        addLocation(latlon, title, infowindow, bounds);
+                    }
+                }
+                document.getElementById('table').classList.add('tableFadeIn');
+                document.getElementById('title1').classList.add('tableFadeIn');
+                resultDisplay = true;
             } else {
-                current_elements[6].innerHTML = "";
+                var log = document.getElementById('errorlog');
+                const field = document.createElement('li');
+                field.innerHTML = 'Cannot find any expensive places';
+                log.appendChild(field);
+                document.getElementById('titlelog').classList.add('tableFadeIn');
+                document.getElementById('errorlog').classList.add('tableFadeIn');
+                errorDisplay = true;
             }
-            // The following code creates a new google maps marker and adds it to the map
-            var latlon = data[i]['latlon']
-            if (latlon != "") {
-                var latlon_split = latlon.split(',')
-                var maps_latlng = { lat: +(latlon_split[0]), lng: +(latlon_split[1]) }
-                var marker = new google.maps.Marker({
-                    position: maps_latlng,
-                    map: map,
-                    title: data[i]['Neighborhood'],
-                });
-                markers.push(marker)
+            if (data['dfs'][1].length > 0){
+                var bottom_five = data['dfs'][1];
+                document.getElementById('table2').innerHTML = data['tables'][1];
+                for (i=0; i < bottom_five.length; i++){
+                    latlon = bottom_five[i]['latlon'];
+                    title = bottom_five[i]['Neighborhood'];
+                    if (latlon != 0){
+                        addLocation(latlon, title, infowindow, bounds);
+                    }
+                }
+                document.getElementById('title2').classList.add('tableFadeIn');
+                document.getElementById('table2').classList.add('tableFadeIn');
+            } else {
+                var log = document.getElementById('errorlog');
+                const field = document.createElement('li');
+                field.innerHTML = 'Cannot find any cheap places';
+                log.appendChild(field);
+                document.getElementById('titlelog').classList.add('tableFadeIn');
+                document.getElementById('errorlog').classList.add('tableFadeIn');
+                errorDisplay = true;
             }
+        } else {
+            var log = document.getElementById('errorlog');
+        
+            for (var error in data) {
+                const field = document.createElement('li');
+                field.innerHTML = data[error];
+                log.appendChild(field);
+            }
+            
+            document.getElementById('loader').style.opacity = 0;
+            document.getElementById('loader').style.height = 0;
+            document.getElementById('titlelog').classList.add('tableFadeIn');
+            document.getElementById('errorlog').classList.add('tableFadeIn');
+    
+            errorDisplay = true;
         }
         // This code fades the tables and titles into view after removing the loader
         document.getElementById('loader').style.opacity = 0;
         document.getElementById('loader').style.height = 0;
-        document.getElementById('table').classList.add('tableFadeIn');
-        document.getElementById('table2').classList.add('tableFadeIn');
-        document.getElementById('title1').classList.add('tableFadeIn');
-        document.getElementById('title2').classList.add('tableFadeIn');
     })
 })

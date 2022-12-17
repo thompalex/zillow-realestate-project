@@ -32,93 +32,24 @@
       <div class="row my-3 mx-3">
         <div class="col">
           <div class="card w-100">
-            <div class="input-group mt-4 mb-2 mx-auto w-75">
-              <div class="dropdown w-100">
-                <button class="btn btn-secondary dropdown-toggle btn-block w-100" type="button"
-                  id="regionDropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
-                  name="region">
-                  Preferred Region
-                </button>
-                <div class="dropdown-menu w-100" aria-labelledby="regionDropdownMenuButton">
-                  <a class="dropdown-item" href="#" name="dropDownItem">Northeast</a>
-                  <a class="dropdown-item" href="#" name="dropDownItem">South</a>
-                  <a class="dropdown-item" href="#" name="dropDownItem">West</a>
-                  <a class="dropdown-item" href="#" name="dropDownItem">Midwest</a>
-                </div>
-              </div>
-            </div>
+
+            {% for key, value_list in parameter.items() %}
 
             <div class="input-group my-2 mx-auto w-75">
               <div class="dropdown w-100">
                 <button class="btn btn-secondary dropdown-toggle btn-block w-100" type="button" id="dropdownMenuButton"
-                  data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" name="price">
-                  Price Range
+                  data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" name={{ key }}>
+                  {{ value_list[0] }}
                 </button>
                 <div class="dropdown-menu w-100" aria-labelledby="dropdownMenuButton">
-                  <a class="dropdown-item" href="#" name="dropDownItem">$0 - $100,000</a>
-                  <a class="dropdown-item" href="#" name="dropDownItem">$100,000 - $300,000</a>
-                  <a class="dropdown-item" href="#" name="dropDownItem">$300,000 - $600,000</a>
-                  <a class="dropdown-item" href="#" name="dropDownItem">$600,000 - $1,000,000</a>
-                  <a class="dropdown-item" href="#" name="dropDownItem">$1,000,000 - $1,500,000</a>
-                  <a class="dropdown-item" href="#" name="dropDownItem">$1,500,000 - $10,000,000</a>
+                  {% for value in value_list[1] %}
+                  <a class="dropdown-item" href="#" name="dropDownItem">{{ value }}</a>
+                  {% endfor %}
                 </div>
               </div>
             </div>
-            <div class="input-group my-2 mx-auto w-75">
-              <div class="dropdown w-100">
-                <button class="btn btn-secondary dropdown-toggle btn-block w-100" type="button" id="dropdownMenuButton"
-                  data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" name="timeline">
-                  Mortgage Timeline
-                </button>
-                <div class="dropdown-menu w-100" aria-labelledby="dropdownMenuButton">
-                  <a class="dropdown-item" href="#" name="dropDownItem">30 years</a>
-                  <a class="dropdown-item" href="#" name="dropDownItem">20 years</a>
-                  <a class="dropdown-item" href="#" name="dropDownItem">15 years</a>
-                  <a class="dropdown-item" href="#" name="dropDownItem">10 years</a>
-                  <a class="dropdown-item" href="#" name="dropDownItem">7 years</a>
-                  <a class="dropdown-item" href="#" name="dropDownItem">5 years</a>
-                  <a class="dropdown-item" href="#" name="dropDownItem">3 years</a>
-                </div>
-              </div>
-            </div>
-
-            <div class="input-group my-2 mx-auto w-75">
-              <div class="dropdown w-100">
-                <button class="btn btn-secondary dropdown-toggle btn-block w-100" type="button" id="dropdownMenuButton"
-                  data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" name="rate">
-                  Mortgage Interest Rate
-                </button>
-                <div class="dropdown-menu w-100" aria-labelledby="dropdownMenuButton">
-                  <a class="dropdown-item" href="#" name="dropDownItem">6% - 7%</a>
-                  <a class="dropdown-item" href="#" name="dropDownItem">5% - 6%</a>
-                  <a class="dropdown-item" href="#" name="dropDownItem">4% - 5%</a>
-                  <a class="dropdown-item" href="#" name="dropDownItem">2% - 4%</a>
-                </div>
-              </div>
-            </div>
-
-            <div class="input-group my-2 mx-auto w-75">
-              <div class="dropdown w-100">
-                <button class="btn btn-secondary dropdown-toggle btn-block w-100" type="button" id="dropdownMenuButton"
-                  data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" name="beds">
-                  Number of Bedrooms
-                </button>
-                <div class="dropdown-menu w-100" aria-labelledby="dropdownMenuButton">
-                  <a class="dropdown-item" href="#" name="dropDownItem">1</a>
-                  <a class="dropdown-item" href="#" name="dropDownItem">2</a>
-                  <a class="dropdown-item" href="#" name="dropDownItem">3</a>
-                  <a class="dropdown-item" href="#" name="dropDownItem">4</a>
-                  <a class="dropdown-item" href="#" name="dropDownItem">5</a>
-                </div>
-              </div>
-            </div>
-
-            <div class="form-check mx-auto mt-2">
-              <input class="form-check-input" type="checkbox" value="" id="forecast_prices">
-              <label class="form-check-label" for="forecast_prices">
-                Sort by Forecasted Greatest and Least Increased Prices (YoY)
-              </label>
-            </div>
+        
+            {% endfor %}
             <div class="d-grid gap-2 my-1 mx-auto w-75">
               <button class="btn btn-primary my-3 w-5" type="button" id="getResults">Get your results!</button>
             </div>
@@ -129,132 +60,16 @@
         </div>
       </div>
       <div class="row mx-3 my-3" style="height:0px" id="tablerow">
+        <h3 style="opacity: 0;" id="titlelog"> Notification</h3>
+        <ul id="errorlog" class="table" style="opacity: 0;"></ul>
         <h3 style="opacity: 0;" id="title1"> Most Expensive</h3>
         <div class="card" id="table" style="opacity: 0;">
-          <table class="table">
-            <thead>
-              <tr>
-                <th scope="col">#</th>
-                <th scope="col">Neighborhood</th>
-                <th scope="col">City</th>
-                <th scope="col">State</th>
-                <th scope="col">Price</th>
-                <th scope="col">Monthly Payment</th>
-                <th scope="col" id="forecast_col1"></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr id="r1">
-                <th scope="row">1</th>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-              </tr>
-              <tr id="r2">
-                <th scope="row">2</th>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-              </tr>
-              <tr id="r3">
-                <th scope="row">3</th>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-              </tr>
-              <tr id="r4">
-                <th scope="row">4</th>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-              </tr>
-              <tr id="r5">
-                <th scope="row">5</th>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-              </tr>
-            </tbody>
-          </table>
+          
         </div>
         <div class="loader mx-auto" style="opacity:0%" id="loader"></div>
         <h3 style="opacity: 0;" id="title2"> Least Expensive </h3>
         <div class="card" id="table2" style="opacity: 0;">
-          <table class="table">
-            <thead>
-              <tr>
-                <th scope="col">#</th>
-                <th scope="col">Neighborhood</th>
-                <th scope="col">City</th>
-                <th scope="col">State</th>
-                <th scope="col">Price</th>
-                <th scope="col">Monthly Payment</th>
-                <th scope="col" id="forecast_col2"></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr id="r6">
-                <th scope="row">1</th>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-              </tr>
-              <tr id="r7">
-                <th scope="row">2</th>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-              </tr>
-              <tr id="r8">
-                <th scope="row">3</th>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-              </tr>
-              <tr id="r9">
-                <th scope="row">4</th>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-              </tr>
-              <tr id="r10">
-                <th scope="row">5</th>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-              </tr>
-            </tbody>
-          </table>
+          
         </div>
       </div>
     </div>

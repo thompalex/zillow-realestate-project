@@ -3,6 +3,8 @@ import numpy_financial as npf
 import http.client, urllib.parse
 import json
 import os
+from search import Limit
+import yaml
 
 # This is where the actual data stuff is done for the most part
 def get_unique_neighborhoods(dataset):
@@ -51,7 +53,6 @@ def add_zipcodes():
             'query': latlon,
             })
         conn.request('GET', '/v1/reverse?{}'.format(params))
-
         res = conn.getresponse()
         data = json.loads(res.read().decode('utf-8'))
         try:
@@ -71,62 +72,58 @@ def create_zipcode_mapping(dataset):
     add_latlon()
     add_zipcodes()
 
-def merge_zillow_data():
+def merge_zillow_data(arg_format):
+    list_numbeds = arg_format['beds']['data']
     # Concatenate each of the csvs that correspond to individual bedroom amounts
     arr = []
-    for i in range(1, 6):
+    for i in list_numbeds:
         nd = pd.read_csv(f'data/zillow_data/{i}_bedroom.csv')
         nd = nd[['RegionID', 'RegionName', 'State', 'City', 'Metro', '2022-10-31']]
-        nd['bedrooms'] = i
+        nd['bedrooms'] = int(i)
         arr.append(nd)
     zillow_data = pd.concat(arr, axis=0)
     return zillow_data
 
 # Generate the project dataset from the zillow files and the region mapping
 def generate_dataset():
+    arg_format = yaml.safe_load(open('config_param.yml', 'rb'))
     region_mapping = pd.read_csv('data/other/states.csv')
+    price_forecasts = pd.read_csv('data/zillow_data/pricing_forecast.csv', usecols=["RegionName", "2023-10-31"])
     # Load in and combine zillow files
-    zillow_data = merge_zillow_data()
-    # Merge with region mapping to get region name
-    data_with_region = pd.merge(zillow_data, region_mapping, left_on="State", right_on="State")
-    # Drop unnecessary columns
-    data_with_region = data_with_region[['RegionID', 'RegionName', 'State', 'City', 'Metro', '2022-10-31', 'bedrooms', 'Region', 'State Name']]
-    # Reset the indicies and save the DF to a csv
-    data_with_region.reset_index()
+    zillow_data = merge_zillow_data(arg_format)
     # I highly recommend not ever deleting the mapping file since it would take around 6 hours to recreate, but this is here for completeness
     if not os.path.exists('data/other/unique_neighborhoods_w_zip_latlon.csv'):
-        create_zipcode_mapping(data_with_region)
+        create_zipcode_mapping(zillow_data)
     # Open Neighborhood to latlon and zipcode mapping file
     zip_latlon_mapping = pd.read_csv('data/other/unique_neighborhoods_w_zip_latlon.csv')
+    # Merge with region mapping to get region name
+    data_with_region = pd.merge(zillow_data, region_mapping, left_on="State", right_on="State")
     # Merge zipcodes and latlons with zillow data
     data_w_zip_latlon = pd.merge(zip_latlon_mapping, data_with_region, left_on=['Neighborhood', 'State', 'City'], right_on=['RegionName', 'State Name', 'City'])
-    # Format data nicely
-    data_w_zip_latlon['State'] = data_w_zip_latlon['State_y']
-    data_w_zip_latlon['Price'] = data_w_zip_latlon['2022-10-31']
-    data_w_zip_latlon = data_w_zip_latlon[['Neighborhood','latlon','zipcode','RegionID','State','City','Metro','Price','bedrooms','Region','State Name']]
-    # Load in price forecasts
-    price_forecasts = pd.read_csv('data/zillow_data/pricing_forecast.csv')    
-    price_forecasts = price_forecasts[['RegionName', '2023-10-31']]
     # Merge price forecasts into project dataset
     complete_df = pd.merge(data_w_zip_latlon, price_forecasts, left_on='zipcode', right_on='RegionName', how='left')
-    print(data_w_zip_latlon)
     # Reformat dataset
-    complete_df['zipcode'] = complete_df['RegionName']
+    complete_df['price'] = complete_df['2022-10-31']
+    complete_df['state'] = complete_df['State_y']
+    complete_df['zipcode'] = complete_df['RegionName_y']
     complete_df['forecast'] = complete_df['2023-10-31']
-    complete_df = complete_df[['Neighborhood','latlon','zipcode','RegionID','State','City','Metro','Price','bedrooms','Region','State Name', 'forecast']]
+    complete_df = complete_df[['Neighborhood','latlon','zipcode','RegionID','state','City','Metro','price','bedrooms','Region','State Name', 'forecast']]
     complete_df.to_csv('data/project_dataset.csv', index=False)
 
 
 def filter_data(data, args):
-    # Each of the four following lines filters out results that do not adhere to the inputs
-    with_region = data[data['Region'] == args['region']]
-    with_bedrooms = with_region[with_region['bedrooms'] == int(args['beds'])]
-    bottom_price, top_price = [int(x.strip(' $').replace(',', '')) for x in args['price'].split('-')]
-    with_all = with_bedrooms.loc[(with_bedrooms['Price'] >= bottom_price) & (with_bedrooms['Price']  <= top_price)]
-    # Get mortgage rate and timeline to calculate monthly payment using numpy_financial
-    rate = sum([int(x.strip().replace('%','')[0]) for x in args['rate'].split('-')]) / 2
+    beds = int(args['beds'])
+    region = args['region'] 
     timeline = int(args['timeline'].split()[0])
-    with_all['monthly_payment'] = with_all['Price'].apply(lambda x: f'${round(-1 * npf.pmt(rate / 100 / 12, 12 * timeline,x), 2):,.2f}')
+    rate = sum([int(x.strip().replace('%','')) for x in args['rate'].split('-')]) / 2
+    price = tuple([int(x.strip(' $').replace(',', '')) for x in args['price'].split('-')])
+    # Each of the four following lines filters out results that do not adhere to the inputs
+    with_region = data[data['Region'] == region]
+    with_bedrooms = with_region[with_region['bedrooms'] == beds]
+    bottom_price, top_price = price
+    with_all = with_bedrooms.loc[(with_bedrooms['price'] >= bottom_price) & (with_bedrooms['price']  <= top_price)].copy()
+    # Get mortgage rate and timeline to calculate monthly payment using numpy_financial
+    with_all['Monthly Payment'] = with_all['price'].apply(lambda x: f'${round(-1 * npf.pmt(rate / 100 / 12, 12 * timeline,x), 2):,.2f}')
     return with_all
     
 
@@ -137,21 +134,28 @@ def make_query(args):
         generate_dataset()
     # Read in the compiled data
     data = pd.read_csv('data/project_dataset.csv').fillna(0)
+    parameter = open('config_param.yml', 'rb')
+    parameter = yaml.safe_load(parameter)
+    queryLimit = Limit(**parameter)
+    args, errorLog = queryLimit.check_param(args)
+    if not args:
+        return None, None, errorLog
     filtered_df = filter_data(data, args)
-    if not args['forecast']:
-        # Get the top 5 most expensive and top 5 least expensive results to display on the frontend
-        most_and_least_expensive = pd.concat([filtered_df.sort_values(by=['Price'], ascending = False).head(), filtered_df.sort_values(by=['Price']).head()], join='inner', ignore_index=True)
-        # Run the geocoding function to get coordinates and return
-        most_and_least_expensive['Price'] = most_and_least_expensive['Price'].apply(lambda x: f'${x:,.2f}')
-        return most_and_least_expensive
     # Calculate forecasted price changes
-    filtered_df['price_change'] = filtered_df.apply(lambda x: x['Price'] * x['forecast'] / 100, axis=1)
-    ## Get highest and lowest expected price change
-    highest_and_lowest_change = pd.concat([filtered_df.sort_values(by=['price_change'], ascending = False).head(), filtered_df.sort_values(by=['price_change']).head()], join='inner', ignore_index=True)
-    # Format prices for frontend
-    highest_and_lowest_change['price_change'] = highest_and_lowest_change['price_change'].apply(lambda x: f'${x:,.2f}')
-    highest_and_lowest_change['Price'] = highest_and_lowest_change['Price'].apply(lambda x: f'${x:,.2f}')
-    return highest_and_lowest_change
+    filtered_df['price_change'] = filtered_df.apply(lambda x: x['price'] * x['forecast'] / 100, axis=1)
+    if args['forecast'] == "False":
+        filtered_df.sort_values(by=['price'], ascending = False, inplace = True)
+    else:
+        filtered_df.sort_values(by=['price_change'], ascending=False, inplace = True)
+    filtered_df['Price Change'] = filtered_df['price_change'].apply(lambda x: f'${x:,.2f}')
+    filtered_df['Price'] = filtered_df['price'].apply(lambda x: f'${x:,.2f}')
+    filtered_df['Beds'] = filtered_df['bedrooms']
+    filtered_df['Zipcode'] = filtered_df['zipcode']
+    filtered_df = filtered_df[['Neighborhood', 'Zipcode', 'City', 'State Name', 'Price', 'Monthly Payment', 'Price Change', 'latlon']]
+    res = [filtered_df.head(5), filtered_df.tail(5)]
+    tables = [df.to_html(index=False, columns=['Neighborhood', 'Zipcode', 'City', 'State Name', 'Price', 'Monthly Payment', 'Price Change'], justify="left", classes='table my-auto') for df in res]
+    dfs = [df.to_dict('records') for df in res]
+    return tables, dfs, None
 
 ### Test statements for these methods ###
 if __name__ == '__main__':
