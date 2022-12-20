@@ -135,22 +135,17 @@ def generate_dataset():
 def filter_data(data, args, param_format):
     # For each parameter of user input in our configuration
     for key in param_format:
+        comp_column = param_format[key]["col"]
         # If we are checking for equality or a range, then we can process the query here
         if param_format[key]["comp"] == "equal":
-            pattern = re.compile(param_format[key]["format"])
-            m = pattern.search(args[key])
-            match_item = m.groups(0)[0]
-            if match_item.isdigit():
-                match_item = int(match_item)
-            data = data[data[param_format[key]["col"]] == match_item]
+            match_item = param_format[key]['data'][args[key]]
+            data = data[data[comp_column] == match_item]
         elif param_format[key]['comp'] == "range":
-            pattern = re.compile(param_format[key]["format"])
-            m = pattern.search(args[key])
-            bottom, top = [int(x) for x in m.groups()]
-            data = data.loc[(data[param_format[key]['col']] >= bottom) & (data[param_format[key]['col']] <= top)]
+            bottom, top = param_format[key]['data'][args[key]]
+            data = data.loc[(data[comp_column] >= bottom) & (data[comp_column] <= top)]
     # For these params, we just want to calculate the estimated monthly payment
-    rate = int(re.match(param_format['rate']['format'], args['rate']).groups()[0])
-    timeline = int(re.match(param_format['timeline']['format'], args['timeline']).groups()[0])
+    rate = param_format['rate']['data'][args['rate']]
+    timeline = param_format['timeline']['data'][args['timeline']]
     data['Monthly Payment'] = data['Price'].apply(lambda x: format_money(-1 * npf.pmt(rate / 100 / 12, 12 * timeline,x)))
     return data
     

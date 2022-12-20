@@ -5,17 +5,18 @@ class Limit:
         self.keys = set(kwargs.keys())
         self.search_param = {}
         for key, item in kwargs.items():
-            self.search_param[key] = Feature(name = item['name'], data = item['data'], format = item['format'], error =  item['error'])
+            self.search_param[key] = Feature(name = item['name'], data = item['data'], error =  item['error'])
         
     # check if the search is possible
     def check_param(self, param):
+        print(self.keys)
         if not set(param.keys()).issubset(self.keys):
             return (None, ["You don't have enough parameter"])
         else:
             errorList = []
             for key, item in param.items():
                 value = self.search_param[key]
-                if (not re.fullmatch(value.get_format(), item) and item not in value.get_data()):
+                if item not in value.get_data().keys():
                     errorList.append(value.get_error())
             return (param, None) if len(errorList) == 0 else (None, errorList)
 
@@ -24,10 +25,9 @@ class Limit:
 
     
 class Feature:
-    def __init__(self, name, data, format, error):
+    def __init__(self, name, data, error):
         self.name = name
         self.data = data
-        self.format = format
         self.error = error
 
     def get_name(self):
@@ -35,9 +35,6 @@ class Feature:
 
     def get_data(self):
         return self.data
-
-    def get_format(self):
-        return self.format
 
     def get_error(self):
         return self.error        
