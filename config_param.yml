@@ -1,6 +1,6 @@
 region: 
   name: 'Region'
-  data: {'Northeast': 'Northeast', 'South': 'South', 'West': 'West', 'Mideast': 'Mideast'}
+  data: {'Northeast': 'Northeast', 'South': 'South', 'West': 'West', 'Midwest': 'Midwest'}
   comp: "equal"
   col: "Region"
   error: 'We cannot find your region'
