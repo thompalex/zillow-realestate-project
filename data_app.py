@@ -4,6 +4,7 @@ import json
 from data_work import make_query
 from search import Limit
 import yaml
+from dotenv import load_dotenv
 
 app = Flask(__name__, 
             static_folder='./static', 
@@ -15,6 +16,7 @@ app = Flask(__name__,
 # Homepage actually displayed to user
 @app.route("/")
 def homepage():
+    load_dotenv()
     google_api_key = os.getenv('GOOGLE_MAPS_KEY')
     parameter = open('config_param.yml', 'rb')
     parameter = yaml.safe_load(parameter)
