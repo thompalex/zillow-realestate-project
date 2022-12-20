@@ -100,8 +100,7 @@ document.getElementById('getResults').addEventListener('click', async (e) => {
         document.getElementById('title2').innerHTML = "Least Expensive";
     }
     // animate the row to extend and then add the loader in
-    document.getElementById('tablerow').classList.add('tableRowAnimate');
-    await delay(1000)
+    document.getElementById('tablerow').style.height = "fit-content";
     document.getElementById('loader').style.opacity = 1;
     // Fetch results from the backend, sending the dict of options the user selected
     fetch('/api', {
@@ -111,7 +110,7 @@ document.getElementById('getResults').addEventListener('click', async (e) => {
         },
         body: JSON.stringify(d)
     }
-    ).then(res => res.json()).then(data => {
+    ).then(res => res.json()).then(async (data) => {
         // Once we have recieved the results, we must process it
         console.log(data)
         if (data['tables'] && data['dfs']){
