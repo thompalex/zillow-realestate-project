@@ -6,6 +6,7 @@ import os
 from search import Limit
 import yaml
 import re
+import datetime
 
 # Format a number into a dollar amount
 def format_money(amount):
@@ -83,24 +84,32 @@ def add_zipcodes():
     unique_neighborhoods_w_latlon['zipcode'] = unique_neighborhoods_w_latlon.apply(lambda x: get_zipcode(x['latlon']), axis=1)
     unique_neighborhoods_w_latlon.to_csv('data/other/unique_neighborhoods_w_zip_latlon.csv')
 
+# Create zipcode mapping using the positionstack api
 def create_zipcode_mapping(dataset):
     # Create zipcode mapping starting with our zillow data
     get_unique_neighborhoods(dataset)
     add_latlon()
     add_zipcodes()
 
+# Find the latest date in a list of dates
+def find_latest_date(dates):
+    dates = [datetime.datetime.strptime(x, '%Y-%m-%d') for x in dates if '20' in x]
+    return str(max(dates).date())
+
 def merge_zillow_data(arg_format):
     # Get the options for numbers of beds and merge their files in
-    list_numbeds = arg_format['beds']['data']
+    list_numbeds = arg_format['beds']['data'].keys()
     # Concatenate each of the csvs that correspond to individual bedroom amounts
     arr = []
     for i in list_numbeds:
         nd = pd.read_csv(f'data/zillow_data/{i}_bedroom.csv')
-        nd = nd[['RegionID', 'RegionName', 'State', 'City', 'Metro', '2022-10-31']]
+        pricecol = find_latest_date(nd.columns)
+        nd['Price'] = nd[pricecol]
+        nd = nd[['RegionID', 'RegionName', 'State', 'City', 'Metro', 'Price']]
         nd['Beds'] = int(i)
         arr.append(nd)
     zillow_data = pd.concat(arr, axis=0)
-    zillow_data = zillow_data[zillow_data['2022-10-31'].notna()]
+    zillow_data = zillow_data[zillow_data['Price'].notna()]
     return zillow_data
 
 # Generate the project dataset from the zillow files and the region mapping
@@ -197,13 +206,14 @@ def make_query(args):
 
 ### Test statements for these methods ###
 if __name__ == '__main__':
-    generate_dataset() if not os.path.exists('data/project_dataset.csv') else None
-    result = make_query({
-            'region': 'Northeast',
-            'beds': "1",
-            'price': '$1000000 - $1500000',
-            'rate': '4%',
-            'timeline': '30 years',
-            'forecast': "True"
-        })
-    print(result)
+    # generate_dataset() if not os.path.exists('data/project_dataset.csv') else None
+    # result = make_query({
+    #         'region': 'Northeast',
+    #         'beds': "1",
+    #         'price': '$1000000 - $1500000',
+    #         'rate': '4%',
+    #         'timeline': '30 years',
+    #         'forecast': "True"
+    #     })
+    # print(result)
+    merge_zillow_data({'beds': {'data':{"1":1}}})

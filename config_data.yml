@@ -11,5 +11,5 @@ pricing_forecasts:
   how: 'left'
   path: "data/zillow_data/pricing_forecast.csv"
 final:
-  reformatting: [["Price", "2022-10-31"], ["Zipcode", "RegionName_y"], ["forecast", "2023-10-31"]]
+  reformatting: [["Zipcode", "RegionName_y"], ["forecast", "2023-10-31"]]
   final_cols: ['Neighborhood','latlon','Zipcode','RegionID','State','City','Metro','Price','Beds','Region','State Name', 'forecast']
