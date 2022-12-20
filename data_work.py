@@ -157,7 +157,15 @@ def format_output(filtered_df):
     filtered_df['Price Change'] = filtered_df['Price Change'].apply(lambda x: format_money(x))
     filtered_df['Price'] = filtered_df['Price'].apply(lambda x: format_money(x))
     # Generate two tables and two dictionaries for output to the frontend
-    res = [filtered_df.head(5), filtered_df.tail(5)]
+    res = [filtered_df.head(5)]
+    N = len(filtered_df)
+    if N >= 10:
+        res.append(filtered_df.tail(5))
+    elif N >= 5:
+        res.append(filtered_df.tail(N - 5))
+    else:
+        res.append(pd.DataFrame(columns = frontend_cols))
+    
     tables = [df.to_html(index=False, columns=frontend_cols, justify="left", classes='table my-auto') for df in res]
     dfs = [df.to_dict('records') for df in res]
     return tables, dfs, None
