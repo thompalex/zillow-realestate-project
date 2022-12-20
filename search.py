@@ -9,7 +9,6 @@ class Limit:
         
     # check if the search is possible
     def check_param(self, param):
-        print(self.keys)
         if not set(param.keys()).issubset(self.keys):
             return (None, ["You don't have enough parameter"])
         else:

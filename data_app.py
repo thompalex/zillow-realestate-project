@@ -27,7 +27,6 @@ def homepage():
 @app.route("/api", methods=["POST"])
 def get_suggestion():
     args = request.get_json()
-    print(args)
     tables, dfs, errorLog = make_query(args)
     if tables is None:
         return errorLog
